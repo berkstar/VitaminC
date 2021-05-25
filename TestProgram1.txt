@@ -1,0 +1,372 @@
+main{
+		/* {name, hp, atk,  def, price}*/
+	apple[5] = { "Apple", 10, 0, 0, 50};
+	bread[5] = { "Bread", 30, 0, 0, 130};
+	potion[5] = {"Potion", 50, 0, 0, 200};
+
+	sword[5] = {"Sword", 0, 5, 0, 500};
+	helmet[5] = {"Helmet", 0, 0, 1, 100};
+    shield[5] = {"Shield", 0, 0, 2, 190};
+    items[6] = {apple,bread,potion, sword, helmet, shield};
+
+
+	/*Monsters {isDead,name, hp, damage, loot}*/
+    slime[4] = {0,"Slime", 10, 3, 20 };
+	ptolemy[4] = {0, "Ptolemy the Quiz Bender", 30, 7, 160};
+    mutantWolf[4] = {0,  "Mutant Wolf", 75, 12, 670};
+	snakeKing[4] = {0, "Snake King", 100, 20, 1600};
+	lod[4] = {0, "Lord of Death", 1000, 999, 999999};
+	monsters[5] = {slime, ptolemy, mutantWolf, snakeKing , lod};
+
+    /*Inventory {apple qty, bread qty, potion qty, sword qty, helmet qty, shield qty}*/
+    inventory[6] = {0, 0, 0, 0, 0, 0};
+
+	/*Player {y cord, x cord, hp, atk, def, balance }*/
+    player[6] = { 6, 4, 20, 5, 0, 0};
+	
+	/*
+    Map {roomType}
+    -1 = Inaccessible , 0 = Empty, 1 = VE Room, 2 = E Room, 3 = H Room, 4 = VH Room, 5 = B Room, 6 = Shop
+    */
+
+	map[9][9] = {
+        { -1, -1, -1, -1, -1},
+	    { -1, -1, 5, -1, -1},
+        { -1, -1, 0, 4, -1},
+        { -1, 3, 0, -1, -1},
+        { -1, 2, 0, -1, -1},
+        { -1, -1, 0, 1, -1},
+        { -1, -1, 0, -1, -1},
+        { -1, -1, 6, -1, -1},
+        { -1, -1, -1, -1, -1}};
+
+    while ( (player[2]) > 0){
+	    printCurrentStatus(player,map);
+	    printCommands(player,map);
+	    string choice = ~io();
+        action(choice,player,map, inventory,monsters);
+    }
+    io~("Game over.");
+
+}
+
+void action(string choice, player[6], map[9][5], inventory[6], monsters[5]){
+	int currentRoomId = map[player[0]][player[1]];
+	bool notProper = 1;
+	while(notProper){
+		if ( choice == ("move")){
+	    	move(player,map);
+		    notProper = 0;
+        }
+        elif (choice == ("use")) {
+			use(player,map, inventory);
+            notProper = 0;
+        }
+        elif ((choice == ("sleep")) && (currentRoomId == 0 )) {
+			sleep(monsters);
+			notProper = 0;
+        }
+        elif ((choice == ("attack")) && ( ( (currentRoomId > 0) && (currentRoomId < 6 ) ) && monsters[currentRoomId][0] == 0)){
+		    attack(player,map,monsters);
+		    notProper = 0;
+        }
+        elif ((choice == ("buy")) && (currentRoomId == 5 )){
+		    buy(player,map, inventory);
+		    notProper = 0;
+        }
+        elif ((choice == ("sell")) && (currentRoomId == 5 )){
+			sell(player,map, inventory);
+			notProper = 0;
+        }
+        elif ((choice == ("sell")) && (currentRoomId == 5 )){
+			player[2] = 0;
+            notProper = 0;
+        }
+        else{
+	        notProper = 1;
+	        printCommands(player,map);
+        }
+    }
+}
+
+void move(player[6], map[9][5]){
+
+    io~("\nSelect direction to move (North = n, South = s, East = e, West = w)");
+    dir direction;
+    string sdir = ~io();
+    if(sdir == ("e")){
+        direction = east;
+    }
+    elif(sdir == ("w")){
+        direction = west;
+    }
+    elif(sdir == ("n")){
+        direction = north;
+    }
+    elif(sdir == ("s")){
+        direction = south;
+    }
+    else{
+        direction = null;
+    }
+    walk(direction, player);
+}
+
+void use(player[6], map[9][5], inventory[6]){
+	bool useDone = 0;
+	do{
+		io~("\n Items in your inventory: ");
+        io~("\n Apple: ", inventory[0] );
+        io~("\n Bread: ", inventory[1] );
+        io~("\n Potion: ", inventory[2] );
+        io~("\n Sword: ", inventory[3] );
+        io~("\n Helmet: ", inventory[4] );
+        io~("\n Shield: ", inventory[5] );
+        io~("Please select item to use (apple, bread, potion, sword, helmet, shield) or type anything to exit.");
+        int itemId = itemConverter(~io());
+        if( itemId > 0){
+            if ( (inventory[itemId]) > 0 ){
+
+                inventory[itemId] = inventory[itemId] - 1;
+                player[2] = player[2] + items[itemid][1];
+                player[3] = player[3] + items[itemid][2];
+                player[4] = player[4] + items[itemid][3];
+                io~("\n You used the item (", items[itemid][0], ")" );
+            }
+            else{
+                io~("\n You don’t have it.");
+            }
+        }
+        else{
+            useDone = 1;
+        }
+    }while(!useDone);
+}
+
+void buy(player[6], map[9][5], inventory[6]){
+	bool buyDone = 0;
+	do{
+		io~("\n Items in your inventory: ");
+        io~("\n Apple: ", inventory[0] );
+        io~("\n Bread: ", inventory[1] );
+        io~("\n Potion: ", inventory[2] );
+        io~("\n Sword: ", inventory[3] );
+        io~("\n Helmet: ", inventory[4] );
+        io~("\n Shield: ", inventory[5] );
+        io~("Please select item to buy(apple, bread, potion, sword, helmet, shield) or type anything to exit.");
+        int itemId = itemConverter(~io());
+        if( itemId > 0){
+            if (player[5] >= items[itemid][4] ){
+                inventory[itemId] = inventory[itemId] + 1;
+                player[5] = player[5] - items[itemid][4];
+                io~("\n You have bought the item (", items[itemid][0], ") for ", items[itemid][4]," gold." );
+            }
+            else{
+                io~("\n You don’t have enough gold.");
+            }
+        }
+        else{
+            buyDone = 1;
+        }
+    }while(!buyDone);
+}
+
+void sell(player[6], map[9][5], inventory[6]){
+	bool sellDone = 0;
+	do{
+		io~("\n Items in your inventory: ");
+        io~("\n Apple: ", inventory[0] );
+        io~("\n Bread: ", inventory[1] );
+        io~("\n Potion: ", inventory[2] );
+        io~("\n Sword: ", inventory[3] );
+        io~("\n Helmet: ", inventory[4] );
+        io~("\n Shield: ", inventory[5] );
+        io~("Please select item to sell(apple, bread, potion, sword, helmet, shield) or type anything to exit.");
+        int itemId = itemConverter(~io());
+        if( itemId > 0){
+            if (inventory[itemId] >0 ){
+                inventory[itemId] = inventory[itemId] - 1;
+                player[5] = player[5] + items[itemid][4];
+                io~("\n You have sold the item (", items[itemid][0], ") for ", items[itemid][4]," gold." );
+            }
+            else{
+                io~("\n You don’t have it.");
+            }
+        }
+        else{
+            sellDone = 1;
+        }
+    }while(!sellDone);
+}
+
+int itemConverter(string itemUseChoice){
+	if (itemUseChoice == ("apple")){
+		return 0;
+	}
+    elif (itemUseChoice == ("bread")){
+		return 1;
+	}
+	elif (itemUseChoice == ("potion")){
+		return 2;
+	}
+    elif (itemUseChoice == ("sword")){
+		return 3;
+	}
+    elif (itemUseChoice == ("helmet")){
+		return 4;
+	}
+    elif (itemUseChoice == ("shield")){
+		return 5;
+	}
+    else{
+	    return -1;
+    }
+}
+/* Used for attack case. */
+void attack(player[6], map[9][9], monsters[5]){
+    int currentRoomId = map[player[0]][player[1]];
+    int dmgReceived = 0;
+    if (( player[4] < monsters[currentRoomId][2])){
+        dmgReceived = monsters[currentRoomId][2] - player[4];
+    }
+
+    io~("\n You attacked each other.");
+    player[2] = player[2] - dmgReceived;
+    monsters[currentRoomId][2] = monsters[currentRoomId][2] - player[3];
+	io~("\n", monsters[currentRoomId][1] ,"’s HP: ", monsters[currentRoomId][2]);
+    io~("\n Your HP: ", player[2]);
+
+    if(monsters[currentRoomId][2] <= 0){
+	    io~("\n", monsters[currentRoomId][1] ," has been defeated. You gained  ", monsters[currentRoomId][4], " golds.");
+	    monsters[currentRoomId][0] = 1;
+    }
+}
+
+/* Replenishes bosses states */
+void sleep(monsters[5]){
+	monsters[0] = {0, "Slime", 10, 3, 20 };
+	monsters[1] = {0, "Ptolemy the Quiz Bender", 30, 7, 160};
+    monsters[2] = {0, "Mutant Wolf", 75, 12, 670};
+	monsters[3] = {0, "Snake King", 100, 20, 1600};
+	monsters[4] = {0, "Lord of Death", 1000, 999, 999999};
+}
+
+
+/* Prints players current state (health, attact, etc.) */
+void printCurrentStatus( player[6], map[9][5] ){
+	io~("\nYour health is ", player[2]);
+    io~("\nYour attack is ", player[3]);
+    io~("\nYour defence is ", player[4]);
+    io~("\nYour balance is ", player[5]);
+    if( map[player[0] + 1][player[1]] != -1 ){
+        io~("\nSouth is accessible.\n The room is ", roomConverter( map[player[0] + 1][player[1]]));
+    }
+    else{
+        io~("\nThere is wall at South.");
+    }
+    if( map[player[0] - 1][player[1]] != -1 ){
+        io~("\nNorth is accessible.\n The room is ", roomConverter( map[player[0] + 1][player[1]]));
+    }
+    else{
+        io~("\nThere is wall at North.");
+    }
+    if( map[player[0]][(player[1]) + 1] != -1 ){
+        io~("\nEast is accessible.\n The room is ", roomConverter( map[player[0] + 1][player[1]]));
+    }
+    else{
+        io~("\nThere is wall at East.");
+    }
+    if( map[player[0]][(player[1]) - 1] != -1 ){
+        io~("\nWest is accessible.\n The room is ", roomConverter( map[player[0] + 1][player[1]]));
+    }
+    else{
+        io~("\nThere is wall at West.");
+    }
+}
+
+
+void printCommands(player[6], map[9][5]){	
+	int currentRoomId = map[player[0]][player[1]];
+
+	if ( currentRoomId == -1){
+		io~("\nThere are no possible actions.");
+    }
+    elif ( currentRoomId == 0){
+		io~("\nPossible actions are: move, use, sleep, exit");
+    }
+    elif ( currentRoomId == 6){
+		io~("\nPossible actions are: move, buy, sell, use, exit");
+    }
+    else{
+    	io~("\nPossible actions are: move, attack, use, exit");
+    }
+    io~("\nPlease enter a command: ");
+}
+
+string roomConverter(int i){
+	if(i == 0){
+		return "Slime Room (Easy)";
+	}
+	elif(i==1){
+		return "Skeleton Room (Very Easy)";
+    }
+    elif(i==2){
+		return "Twilight Room (Hard Room)";
+    }
+    elif(i==3){
+		return "Forest Room (Very Hard Room)";
+    }
+    elif(i==4){
+	    return "King’s Room (Boss Room)";
+    }
+    elif(i==5){
+		return "Shop";
+    }
+    else{
+    	return "Wall";
+    }
+}
+
+
+/*BUrada bi sıkını var DİKKAT !!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+void walk ( dir direction, player[6] ) {
+	if( direction == north ) {
+		if( (_hitcheck(north, player, map)) ){
+			io~("\nYou walked North.");
+			player[0]--;
+        }
+        else{
+	        io~("You hit the wall.\n");
+        }	
+    }
+
+    if( direction == south ) {
+	    if((_hitcheck(north, player, map))){
+		    io~("\nYou walked South.");
+            player[0]++;
+        }
+        else{
+        	io~("\nYou hit the wall.");
+        }	
+    }
+
+    if( direction == west ) {
+		if((_hitcheck(north, player, map))){
+			io~("\nYou walked West.");
+            player[1]++;
+        }
+        else{
+	        io~("\nYou hit the wall.");
+        }	
+    }
+
+    if( direction == east ) {
+		if((_hitcheck(north, player, map))){
+			io~("\nYou walked East.");
+			player[1]--;
+        }
+        else{
+	        io~("\nYou hit the wall.");
+        }	
+    }
+}

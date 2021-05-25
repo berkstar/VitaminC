@@ -1,0 +1,120 @@
+main{
+    /* This Test file is used for testing unused cases in first test program. */
+    bool turn = 0;
+    int choice;
+    int cordX;
+    int cordY;
+    table[3][3];
+    io~("\n Welcome to 3x3 tic tac toe game");
+    
+
+    /* Other Test Cases */
+
+    char aChar = 'A';
+    char bChar = 'B';
+    float floatOne = 3.14;
+
+    io~( aChar + 1 ); /* This should print the character 'B' */
+
+    float mathPrecedence = 14 * 3 + 7  / (3 - 1);
+
+    floatOne = floatOne + mathPrecedence;
+
+    io~( (true ^ false) || ((isWater()) && !(isLava()) ));
+
+    int sqVal = square.(2);
+    int absVal = abs.(-4);
+
+    bool terVal = (-4 > 4) ? true : false;
+
+
+    if (aChar == bChar){
+        io~("\n Characters are different.");
+    }
+
+    if (sqVal == 4){
+        io~("\n Square function worked properly.");
+
+    }
+
+    if (absVal == 4){
+        io~("\n Absolute function worked properly.");
+
+    }
+
+
+    int coco = 0;
+    do{
+        io~("Count" <+> coco);
+        coco++;
+    }while(coco < 5);
+
+
+    /* Multiple line comment (Those are in comment since they give syntax error.)
+        
+        int = 20; 
+        fore (int i = 0; i < 6; i++) {}
+        ~io~("hello world");
+
+        char cChar = 'AB'; Gives an error.
+    
+     */
+
+
+
+    while(hasWinner()){
+        io~("\n");
+        display(table);
+
+        
+        if(turn){
+            choice = "X";
+        }
+        else{
+            choice = "O";
+        }
+
+        io~("\n Please enter x cordinate.(0-2)");
+        cordX = ~io();
+
+        io~("\n Please enter y cordinate.(0-2)");
+        cordY = ~io();
+
+        table[cordY][cordX] = choice;
+        turn = !turn;
+    }
+    io~("\n" , choice, "has won the game.");    
+}
+
+bool hasWinner(table[3][3]){
+    
+    for(int col = 0; col < 3; col++){
+        /* Columnwise scan*/
+        if ( ( (table[0][col] ) == ( table[1][col] ) ) && ( (table[1][col] ) == (table[2][col]) ) ){
+            return 1;
+        }
+        /* Rowwise scan*/
+        if ( ( (table[col][0]) == (table[col][1]) ) && ((table[col][1]) == (tableco[col][2]) ) ){
+            return 1;
+        }
+        /* Diaognal scan*/
+        if(( (table[0][0]) == (table[1][1]) ) && ((table[1][1]) == (tableco[2][2]))){
+            return 1;
+        }
+        if(( (table[0][2]) == (table[1][1]) ) && ((table[1][1]) == (tableco[2][0]))){
+            return 1;
+        }
+        return 0;
+    }
+
+}
+
+void display(table[3][3]){
+    for(int i = 0; i < 3; i++){
+        io~("\n");
+        for(int j = 0; j < 3; j++){
+            io~(table[j][i], "\t");
+        }
+    }
+
+}
